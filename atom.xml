@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>VisezTrance</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/" />
+    <link rel="self" type="application/atom+xml" href="http://viseztrance.com/atom.xml" />
+    <id>tag:viseztrance.com,2008-10-15://1</id>
+    <updated>2013-10-21T21:17:14Z</updated>
+    <subtitle>The wonderful world of Lorem Ipsum</subtitle>
+    <generator uri="http://www.sixapart.com/movabletype/">Movable Type 5.02</generator>
+
+<entry>
+    <title>Persist javascript objects between pages</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2013/10/persist-javascript-objects-between-pages.html" />
+    <id>tag:viseztrance.com,2013://1.57</id>
+
+    <published>2013-10-21T21:14:43Z</published>
+    <updated>2013-10-21T21:17:14Z</updated>
+
+    <summary>Some time ago I worked on a javascript game. One of the major issues I had to overcome, was that all my data would be gone on a page reload or when closing and opening the browser. I&apos;ve been doing...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="javascript" label="JavaScript" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="localstorage" label="localStorage" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[Some time ago I worked on a javascript game. One of the major issues I 
+had to overcome, was that all my data would be gone on a page reload or 
+when closing and opening the browser. I've been doing javascript for 
+quite some time now, but I never gave this issue much thought until that
+ time. After searching for a solution, I came out disappointed. <br /><br />I
+ had an object named "game" that contained all the other objects, 
+players, stars, galaxy and they all cross referenced each other (similar
+ to any has many and belongs to associations). Ideally, this would be 
+stored and rebuild on page load. <br /><br />So I came up with my own implementation, which I'll be open sourcing today: <a href="https://github.com/viseztrance/perseverance">https://github.com/viseztrance/perseverance</a><br /><br />If you have any issue, feel free to mail me or open a ticket. However you may want to run the jasmine tests first.<br />]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>From fixtures to factory girl</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2013/10/from-fixtures-to-factory-girl.html" />
+    <id>tag:viseztrance.com,2013://1.56</id>
+
+    <published>2013-10-07T21:55:31Z</published>
+    <updated>2013-10-07T22:02:44Z</updated>
+
+    <summary>Inheriting a legacy application doesn&apos;t really have to be a chore. Bringing everything up to date is rewarding in its own way, although writing a ton of new tests isn&apos;t the most exciting thing around. Once everything was at a...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="factorygirl" label="FactoryGirl" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="rspec" label="Rspec" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[Inheriting a legacy application doesn't really have to be a chore. Bringing everything up to date is rewarding in its own way, although writing a ton of new tests isn't the most exciting thing around. <br /><br />Once everything was at a point we were comfortable with, we replaced the tightly coupled fixtures with Factory Girl. I knew there's a significant performance penalty to be paid, but it was rather shocking. At 20 minutes, the test suite took almost twice as long.<br /><br />I refactored some tests, mostly replacing FactoryGirl's create method with build_stubbed for non database operations but managed to shave off only two minutes.<br /><br />After some research, it looked like a user was created for every controller spec. There were legitimate cases, but most of the time this wasn't the case. So I ended up doing the following - a controller's current_user method gets stubbed by default, whereas if a current_user argument is passed it gets created as an AR object, for instance:<br /><br /><blockquote>it "does stuff", current_user: true do<br />&nbsp; # doing stuff<br />end<br /></blockquote><br />The code responsible looked similar to the following:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each, type: :controller do<br />&nbsp;&nbsp;&nbsp; user = if example.options[:current_user]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.create(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.build_stubbed(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; controller.stub(:current_user).and_return(user)<br />&nbsp; end<br />end<br /></blockquote><br />The tests were faster at almost 12 minutes, but they still felt slow. Rspec's "--profile" flag didn't return any major offenders and just confirmed that most of the tests were just "slow". Trying to shave a few more seconds, I tried to use the same current_user approach to restrict search indexing.<br /><br />As we were using an acts_as_solr:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each do<br />&nbsp;&nbsp;&nbsp; solr_models = [Model1, Model2, #..]<br />&nbsp;&nbsp;&nbsp; solr_models.each do |model|<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if example.options[:search]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ActsAsSolr::Post.execute(Solr::Request::Delete.new(:query =&gt; "type_t:#{model}"))<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = true<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = false<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />end<br /></blockquote><br />Not the cleanest implementation around, but it got the job done. The results were surprising to say the least. The tests took almost two and a half minutes, which is quite ok for over one thousand tests.<br />]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Abstract naming conventions</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2012/05/abstract-naming-conventions.html" />
+    <id>tag:viseztrance.com,2012://1.55</id>
+
+    <published>2012-05-01T16:12:49Z</published>
+    <updated>2012-05-01T19:24:03Z</updated>
+
+    <summary>From time to time I get stumped - I just can&apos;t find a *good* name for a class, method or variable. Sometimes I search for synonyms online or ask a colleague for suggestions. However, the naming conventions used in rails...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="naming" label="naming" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="rails" label="rails" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[From time to time I get stumped - I just can't find a *good* name for a class, method or variable. Sometimes I search for synonyms online or ask a colleague for suggestions. However, the naming conventions used in rails makes things easier, yet they may not scale very well. <br /><br />For example, a polymorphic comment association is usually named commentable, whereas for an image - imageable. Simple enough, but the fact is that I actually ended up with names such as photoable, wallable and wizzardable (I kid you not).<br /><br />Right now I'm using parent, and it works great.<br /><br /><blockquote>belongs_to :parent, :polymorphic =&gt; true<br /></blockquote><br />However, parent.parent.post is not as informative as imageable.commentable.post, but frankly this is hardly a problem. Based on <a href="http://railscasts.com/episodes/154-polymorphic-association">this railscasts episode</a>, I could get the current parent inside a controller by using the following:<br /><br /><blockquote>def find_commentable<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(.+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />Do this for images as well, and you'll probably see a pattern. So how about we just rewrite it in the application controller:<br /><br /><blockquote>def current_parent<br />&nbsp; return @current_parent if @current_parent<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(\w+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @current_parent = $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return @current_parent<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />So using parent actually makes sense. <br /><br />If your application gets large enough, or you need to fix a bug on an older project you'll probably notice one thing - you can't recall the column names. Was it name, subject, title or content, contents, description? This gets even worse if you haven't wrote that code in the first place. For more than a year, on the projects I've been working on (which have been quite a few) I decided on always sticking with name for single line descriptions (varchar) and contents for the ones with multiple lines (text). There may be other fields of course, but this worked out surprisingly well. <br /><br />It feels nice when a colleague writes the frontend and doesn't even need to look over the database schema. ]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Nodejs and coffeescript</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/10/nodejs-and-coffeescript.html" />
+    <id>tag:viseztrance.com,2011://1.54</id>
+
+    <published>2011-10-06T17:55:42Z</published>
+    <updated>2011-10-06T18:48:39Z</updated>
+
+    <summary>My first contact with nodejs was at Yahoo&apos;s open hack event that took place at Bucharest last spring. It was fun, however I just couldn&apos;t find the time to tinker with it as much as I would&apos;ve liked to.Lately this...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="coffeescriptnodejs" label="coffeescript nodejs" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[My first contact with nodejs was at Yahoo's open hack event that took place at Bucharest last spring. It was fun, however I just couldn't find the time to tinker with it as much as I would've liked to.<br /><br />Lately this changed, and I'm actually using it for a project we're developing at work where it fits the bill quite nicely. While I'm quite familiar with javascript I'm coding in coffeescript. Initially I was reluctant on using it especially as I'm not very found of indentation based languages, but as far as backend javascript developing goes, it's a god send.<br />I think that the main reason I like it despite its flaws (it's just a wrapper after all) is that it almost forces good coding practices such as using short methods and avoiding deeply nested constructs.<br /><br />I'm using the <a href="https://github.com/defunkt/coffee-mode">emacs coffee mode</a> extension to compile my coffee files to js on each save. I imagine that most major editors have similar extensions as well.<br /><br />Restarting node on each change can get a bit tiresome. To resolve this I'm using the <a href="https://github.com/isaacs/node-supervisor">supervisor plugin</a>:<br /><br /><blockquote>npm install -g supervisor<br /></blockquote><br />And instead of starting the application with node:<br /><br /><blockquote>supervisor -p server.js<br /></blockquote><br />Basically the browser can now be refreshed on each coffee file change. Neat.<br />]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Sitemap</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/09/sitemap.html" />
+    <id>tag:viseztrance.com,2011://1.53</id>
+
+    <published>2011-09-27T20:25:41Z</published>
+    <updated>2011-09-27T20:54:58Z</updated>
+
+    <summary>I recently wrote a sitemap gem for one of the more larger sites I have been working on, which was recently revamped.To be fair I searched for existing solutions, but I found them lacking for one reason or another. One...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="rails" label="rails" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[I recently wrote <a href="https://rubygems.org/gems/sitemap">a sitemap gem</a> for one <a href="http://zilesinopti.ro/">of the more larger sites</a> I have been working on, which was recently revamped.<br /><br />To be fair I searched for existing solutions, but I found them lacking for one reason or another. One of the main problems that these plugins couldn't overcome was generating a different url (such as dynamic domains) based on an existing attribute.<br /><br />There are some limitations as well, most notably the 50.000 urls per sitemap, but I'm planning on resolving this issue some time in the near future.<br /><br />If you decide to test it I strongly believe that the docs cover the functionality pretty well. Additionally make sure using webmaster-tools that google bot can use your feed.<br />]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>User names consistency</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/09/user-names-consistency.html" />
+    <id>tag:viseztrance.com,2011://1.52</id>
+
+    <published>2011-09-27T19:55:41Z</published>
+    <updated>2011-09-27T20:24:14Z</updated>
+
+    <summary>Just as I don&apos;t like mixing tabs with spaces I hate it when people type in a form using their real name without any concern for capitalization.I could had certainly write a one liner that fixes this, but I recently...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="ruby" label="ruby" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[Just as I don't like mixing tabs with spaces I hate it when people type in a form using their real name without any concern for capitalization.<br /><br />I could had certainly write a one liner that fixes this, but I recently started using the <a href="https://rubygems.org/gems/namecase">namecase gem</a> which also provides some more interesting cases as well:<br /><br /><blockquote><pre>NameCase("RON BURGUNDY")  # =&gt; Ron Burgundy
+NameCase("MCDONALDS")     # =&gt; McDonalds</pre></blockquote>]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Old wounds heal slow</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/03/old-wounds-heal-slow.html" />
+    <id>tag:viseztrance.com,2011://1.48</id>
+
+    <published>2011-03-19T09:55:53Z</published>
+    <updated>2011-03-19T09:59:11Z</updated>
+
+    <summary>Internet Explorer 9 was recently launched and received an overwhelming amount of positive reviews as well as a nice welcome from the developer community.My thoughts about it remind me of a story I heard many years ago.A child&apos;s obnoxious behavior...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="internetexplorer" label="internet explorer" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[Internet Explorer 9 was recently launched and received an overwhelming amount of positive reviews as well as a nice welcome from the developer community.<br /><br />My thoughts about it remind me of a story I heard many years ago.<br /><br /><blockquote>A child's obnoxious behavior upsets his father on a daily basis. The afflicted parent would sometimes hammer a nail onto a door. After a while the curious child asked about the nails - "I've put a nail every time you made a bad deed", his father sorrowly answered. Later on, somewhat troubled, the child told his father "Look, I've thought about it and I don't want to upset you again, but for each day I behave you will take out a nail." The two were in agreement and as the days passed the parent would remove one nail after the other. One day the boy noticed that the nails were all gone. Happy, he called out his father "Look, I made it, the door doesn't have any more nails". "You're right", his father answered, "but what about the holes?"<br /></blockquote><br />While it's really nice that IE is once again a good browser, it's just not going to give me back all the nights I lost hacking layouts for the better half of the last decade.
+     ]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>I&apos;m done posting on StackOverflow</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/03/im-done-posting-on-stackoverflow.html" />
+    <id>tag:viseztrance.com,2011://1.47</id>
+
+    <published>2011-03-07T00:09:52Z</published>
+    <updated>2011-03-07T00:16:06Z</updated>
+
+    <summary>I can honestly say that the main reason for helping others is selfishness, because you see there&apos;s a certain feeling of accomplishment when helping someone with an issue that eluded me as well.A few years ago I found my self...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="stackoverflow" label="stackoverflow" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[I can honestly say that the main reason for helping others is selfishness, because you see there's a certain feeling of accomplishment when helping someone with an issue that eluded me as well.<br /><br />A few years ago I found my self spending quite <a href="http://xkcd.com/386">some time</a> on various forums. While it was mostly procrastinating I had the distinct feeling that I was actually contributing to something. After moving out from my parents house, on to the big city I met some very cool people, that had a lesser interest in an online presence and more of a hands on approach to tackle real problems. I was now reading the source code rather then browsing outdated blog posts.<br /><br />One day, having a project with a tighter deadline and a long commute I was working from the comfort of my home trying to finish up. I was almost there, just needed to implement a pure javascript survey module by detecting the most common element in an array. Not a difficult task per se, but once you begin to feel tired, lousy code doesn't look that bad anymore. I took a short nap to rejuvenate my strength, but before doing so also asked a question on this new website popping up in the results all the time, named <a href="http://stackoverflow.com/">StackOverflow</a>. Upon waking up I found a few answers, but most importantly they worked. It almost felt like cheating.<br /><br />Since then I answered other people questions on SO every now and then. Reward points are being granted by doing so which feel quite nice. What didn't felt so nice was that answers to difficult questions were more unlikely to be voted up, probably because few had the knowledge to understand them, while easier common day issues would get way more attention. Suffice to say that the very system that made it so great was also its greatest fault. As post quality dropped, so did my interest.<br /><br />Granted, I found many gems there, but it's time to walk away and wait for the "next thing". ]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Texts over multiple lines with RMagick</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/03/texts-over-multiple-lines-with-rmagick.html" />
+    <id>tag:viseztrance.com,2011://1.46</id>
+
+    <published>2011-03-02T21:14:51Z</published>
+    <updated>2011-03-02T21:27:47Z</updated>
+
+    <summary>I recently worked on a project that generated some custom images using RMagick. There were several texts involved with some spanning over multiple rows. While RMagick does provide a caption method that wraps the text, I found it rather limiting....</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="rmagick" label="RMagick" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="ruby" label="ruby" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[I recently worked on a project that generated some custom images using RMagick. There were several texts involved with some spanning over multiple rows. While RMagick does provide a caption method that wraps the text, I found it rather limiting. So instead I used the more powerful annotate method which allowed me to set my own font and text position.<br /><br />Having just a canvas (an RMagick image for background), I started by creating a new drawing object:<br /><br /><blockquote>drawing = Magick::Draw.new<br /></blockquote><br />I then used a method for splitting the text into rows (stolen from a rails helper):<br /><br /><blockquote>def word_wrap(text, columns = 80)<br />&nbsp; text.split("\n").collect do |line|<br />&nbsp;&nbsp;&nbsp; line.length &gt; columns ? line.gsub(/(.{1,#{columns}})(\s+|$)/, "\\1\n").strip : line<br />&nbsp; end * "\n"<br />end<br /></blockquote><br />Writing the actual text was easier than I initially thought.<br /><br /><blockquote>position = 80<br />word_wrap(my_long_text, 90).split(\n).each do |row|<br />&nbsp; drawing.annotate(canvas, 0, 0, 200, position += 20, row)<br />end<br /></blockquote><br />The text is being added at the 200, 100 coordinates, with a line height of 20. That's it.
+     
+
+]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Website screenshots under linux are about to get easier</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/02/website-screenshots-under-linux-are-about-to-get-easier.html" />
+    <id>tag:viseztrance.com,2011://1.45</id>
+
+    <published>2011-02-26T23:39:12Z</published>
+    <updated>2011-02-27T00:15:23Z</updated>
+
+    <summary>I just published the code that handles the screenshots of mywebsit.es.Either use &quot;gem install website_screenshot&quot; or head over to github to get it. I also posted a web service demo to make implementation more straightforward.Dependencies include ruby 1.8.6 or higher,...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="qtwebkit" label="qt webkit" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="ruby" label="ruby" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="sinatra" label="sinatra" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[I just published the code that handles the screenshots of <a href="http://mywebsit.es/">mywebsit.es</a>.<br /><br />Either use "gem install website_screenshot" or head over to <a href="https://github.com/viseztrance/website_screenshot">github</a> to get it. I also posted a <a href="http://github.com/viseztrance/website_screenshot_service">web service demo</a> to make implementation more straightforward.<br /><br />Dependencies include ruby 1.8.6 or higher, ruby qt and curl.<br />Tested on Ubuntu LTS and Fedora.<br />]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>A ruby on rails frontend implementation story</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2011/01/a-ruby-on-rails-frontend-implementation-story.html" />
+    <id>tag:viseztrance.com,2011://1.44</id>
+
+    <published>2011-01-23T17:27:07Z</published>
+    <updated>2011-01-23T17:41:27Z</updated>
+
+    <summary>For the last year I have been working on a large social network website. As I preper to move forward I can&apos;t help thinking of the challenges that aroused during this time. One in particular stood out. The form fields...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="frontendimplementation" label="frontend implementation" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="rubyonrails" label="ruby on rails" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[For the last year I have been working on a large social network website.<br />
+As I preper to move forward I can't help thinking of the challenges that aroused during this time.<br />
+One in particular stood out. The form fields were heavily customised - 
+every field, be it a simple text or select, even file uploads were all 
+styled.<br />
+The design was less than ideal for a project this size to say the least.<br />
+<br />
+While I didn't code the html I had to find a solution to integrate it that worked well and wouldn't prove to be time consuming.<br />
+The solution I chose was to extend the default form and use it across 
+the site. Even if these forms were to be styled with javascript it would
+ had just resulted in a poor user experience as each page form would 
+briefly be displayed naked then quickly styled.<br />
+<br />
+Bear in mind that this code runs under Rails 2. It may require some adjustments to work with 3.<br />
+<br />
+Firstly I defined my own form builder:<br />
+<br /><blockquote>
+class CustomFormBuilder &lt; ActionView::Helpers::FormBuilder<br />
+<br />
+&nbsp; include ActionView::Helpers::TagHelper<br />
+&nbsp; include ActionView::Helpers::AssetTagHelper<br />
+<br />
+&nbsp; ..<br />
+<br />
+end<br /></blockquote>
+<br />
+As it was going to be used sitewise I also made it default in my environment file:<br />
+<br /><blockquote>
+ActionView::Base.default_form_builder = CustomFormBuilder<br /></blockquote>
+<br />
+Each text field had to be enclosed in a specific span tag with the class
+ "input_text". Targeting with input[type="text"] would had probably 
+worked just as well if you ignore IE6.<br />
+<br /><blockquote>
+def text_field(method, wrapper_options = {}, input_options = {})<br />
+&nbsp; wrapper_options[:class] = (wrapper_options[:class].to_s + ' input_text').strip<br />
+&nbsp; wrapper_options.reverse_merge!({ :class =&gt; 'input_text' })<br />
+&nbsp; content_tag :span, @template.send(:text_field, @object_name, method, objectify_options(input_options)), wrapper_options<br />
+end<br /></blockquote>
+<br />
+You can style both the wrapper and the input field with separate option hashes.<br />
+The password, textarea and select fields were similarly styled. The 
+latter was albeit more difficult but I'm not going to post the code as 
+the markup differs significantly from one implementation to another.<br />
+<br />
+After doing these I received an interesting request of extending the 
+label tag, having many fields that were mandatory and had to be 
+displayed accordingly.<br />
+<br /><blockquote>
+def label(method, text = nil, options = {})<br />
+&nbsp; if options[:required]<br />
+&nbsp;&nbsp;&nbsp; text = (text || method.to_s.humanize) + ' &lt;span class="highlight"&gt;*&lt;/span&gt;'<br />
+&nbsp; end<br />
+&nbsp; super<br />
+end<br /></blockquote>
+<br />
+To do the file uploads (which were surprisingly plentiful) I decided on 
+creating my own helpers, rather than just extending the basic "file". 
+This was mostly because I needed both an actual file upload and a photo 
+upload which had a very different behaviour such a live thumbnails. I 
+used flash (swf upload) because it was the only crossbrowser way of 
+selecting multiple files and styling the actual button.<br />
+<br /><blockquote>
+def flash_photo_upload(name = 'files', options = {})<br />
+&nbsp; locals = {<br />
+&nbsp;&nbsp;&nbsp; :f =&gt; self,<br />
+&nbsp;&nbsp;&nbsp; :name =&gt; name.to_s,<br />
+&nbsp;&nbsp;&nbsp; :queue_limit =&gt; options['queue_limit']<br />
+&nbsp; }<br />
+<br />
+&nbsp; @template.render :partial =&gt; 'partials/flash_file_upload', :locals =&gt; locals<br />
+end<br /></blockquote>
+<br />
+There's a large amount of code responsible for the entire upload 
+process, that's why I isolated it in a partial. Why so much code you 
+ask, well for instance once one or more photos gets uploaded they're 
+displayed in a carousel; also take into consideration that it had to 
+work seamlessly when editing.<br />
+<br />
+The final piece was styling the submit buttons (and also some links that
+ needed to look as buttons) - rounded cornered of different size and 
+backgrounds using a beautiful but proprietary font with a text shadow. 
+We had to support IE, so CSS3 was out of the question because we needed 
+the rounded corners which don't degrade very well. Legal font issues 
+aside, normally I would be doing this with the sliding doors css technique. I went the extra mile and generated the images in ruby using 
+the same css technique but with rmagick. The code partially supported 
+some css parameters to make styling easier.<br />
+I extracted that code and made it public as a gem named <a href="https://rubygems.org/gems/magic_door">magic_door</a>. The helpers are packed separately
+ as a <a href="https://github.com/viseztrance/magic_door_helpers">plugin</a>.<br /><br />
+I hope this helps anyone who faces a similar situation. ]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Scale and center crop with ImageMagick one liner</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2010/09/scale-and-center-crop-with-imagemagick-one-liner.html" />
+    <id>tag:viseztrance.com,2010://1.42</id>
+
+    <published>2010-09-07T19:30:47Z</published>
+    <updated>2010-09-07T19:36:15Z</updated>
+
+    <summary>A few days ago I needed an image magick command that scales and crops a picture on its center. I looked up the last project I used it and found the magical line (pun intended). I&apos;ll post it here as...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[<div>A few days ago I needed an image magick command that scales and crops a picture on its center. I looked up the last project I used it and found the magical line (pun intended). I'll post it here as a future reference for my self and perhaps it will help others as well.</div><div><br /></div><blockquote class="webkit-indent-blockquote" style="margin: 0 0 0 40px; border: none; padding: 0px;"><div>convert myPhoto.jpg -resize 200x200^ -gravity Center -crop 200x200+0+0 +repage myThumb.png</div></blockquote><div><br /></div><div>The "myPhoto.jpg" picture is being scaled down to 200 pixels - width or height (the one that has lowest size), then it's cropped on the center. "myThumb.png" is the name of the photo that's being created.&nbsp;</div><meta http-equiv="content-type" content="text/html; charset=utf-8"> ]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Generating a unique identifier</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2010/08/generating-a-unique-identifier.html" />
+    <id>tag:viseztrance.com,2010://1.39</id>
+
+    <published>2010-08-03T22:31:42Z</published>
+    <updated>2010-08-03T22:46:19Z</updated>
+
+    <summary>Generating a unique string value is a fairly common idiom. I always thought the fastest/easiest way to do so was by merging a timestamp with a random value. Not really unique, but fairly close nevertheless. Yet, there&apos;s better way by...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[Generating a unique string value is a fairly common idiom. I always thought the fastest/easiest way to do so was by merging a timestamp with a random value. Not really unique, but fairly close nevertheless. <br />Yet, there's better way by using <a href="http://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> which provides a more reliable unique identifier. Most languages either have it build in or there's a library available.<br /><br />For example, in php I could use the build in <a href="http://php.net/manual/en/function.uniqid.php">uniqid() </a>function:<br /><br /><blockquote>print uniqid();<br />&gt; "4c5896b421e54"<br /></blockquote><br />or in ruby with the help of the <a href="http://rubygems.org/gems/uuid">uuid gem</a>:<br /><br /><blockquote>UUID.generate<br />&gt; "73f93750-817b-012d-5ea3-00242165bf55"<br /></blockquote>]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Visual bookmarks with mywebsit.es</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2010/06/visual-bookmarks-with-mywebsites.html" />
+    <id>tag:viseztrance.com,2010://1.37</id>
+
+    <published>2010-06-26T13:39:35Z</published>
+    <updated>2010-06-26T14:02:44Z</updated>
+
+    <summary>I&apos;m happy to announce mywebsit.es, a visual bookmarks directory. It&apos;s similar to opera&apos;s quick dial or chrome&apos;s thumbnail start page but has a larger degree of flexibility. By using open id it shouldn&apos;t take more than 10 seconds to create...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="bookmark" label="bookmark" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="mywebsites" label="mywebsit.es" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="qtwebkit" label="qt webkit" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="rails" label="rails" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="startpage" label="start page" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[<img alt="mywebsit.es.png" src="http://viseztrance.com/mywebsit.es.png" width="356" height="325" class="mt-image-left" style="float: left; margin: 0 20px 20px 0;" />I'm happy to announce <a href="http://mywebsit.es">mywebsit.es</a>, a visual bookmarks directory. It's similar to opera's quick dial or chrome's thumbnail start page but has a larger degree of flexibility. By using open id it shouldn't take more than 10 seconds to create an account.<div><br /></div><div>From a technical standpoint it combines a qt webkit ruby class that's being called through xvfb by a sinatra app which acts as an api. This api is being called by a rails application that manages the actual bookmarks and saved screenshots.</div><div><br /></div><div>I would appreciate it if you would try it out.</div>]]>
+        
+    </content>
+</entry>
+
+<entry>
+    <title>Timing out</title>
+    <link rel="alternate" type="text/html" href="http://viseztrance.com/2010/04/timing-out.html" />
+    <id>tag:viseztrance.com,2010://1.34</id>
+
+    <published>2010-04-30T20:40:44Z</published>
+    <updated>2010-04-30T20:49:33Z</updated>
+
+    <summary>I was running a rake task that launched a third party proprietary binary that handled some files. The process was usually fast, lasting about two or three seconds per file although sometimes it would just lock up and become unresponsive...</summary>
+    <author>
+        <name>Daniel</name>
+        <uri>http://viseztrance.com</uri>
+    </author>
+    
+    <category term="defensiveprogramming" label="defensive programming" scheme="http://www.sixapart.com/ns/types#tag" />
+    <category term="timeout" label="timeout" scheme="http://www.sixapart.com/ns/types#tag" />
+    
+    <content type="html" xml:lang="en" xml:base="http://viseztrance.com/">
+        <![CDATA[<div>I was running a rake task that launched a third party proprietary binary that handled some files. The process was usually fast, lasting about two or three seconds per file although sometimes it would just lock up and become unresponsive while still pegging the cpu at 100%.</div><div>While I love a good challenge, there are times when a battle proven solution is preferable.</div><div>Fortunetly for me, there was a *nix command named timeout, that did exactly what I was looking for.</div><div><br /></div><div>The following would kill a running command with signal 9 (the equivalent of powering off the computer) if it runs longer than 30 seconds:</div><div><br /></div><blockquote class="webkit-indent-blockquote" style="margin: 0 0 0 40px; border: none; padding: 0px;"><div>timeout --signal=9 30s /some/command</div></blockquote><div><br /></div><div>Suffice to say, that I was so pleased of this solution that I'm going to use it everytime I can.</div><div>A slight warning - the timeout command is provided by the coreutils package. While it was avaiable in Fedora, it wasn't on the staging machine I deployed it to, running CentOS. I did managed to get it working (without any problems) using the binary from my desktop machine.</div> ]]>
+        
+    </content>
+</entry>
+
+</feed>

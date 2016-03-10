@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="description" content="Persist javascript objects between pages,From fixtures to factory girl," />
+
+
+    <title>VisezTrance: October 2013 Archives</title>
+      
+      <link rel="prev" href="http://viseztrance.com/2012/05/" title="May 2012" />
+      
+    
+	</head>
+	<body>
+		<div id="container">
+			<!-- Header -->
+  			<div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+			<!-- Header End -->
+			
+			<!-- Content -->
+			<div id="content">
+			
+			  
+          <h2 class="page-title">October 2013 Archives</h2>
+        
+        
+	      <ul id="posts-list">
+	        
+          
+            <li class="post" id="post-57">
+  
+  
+     <div class="meta-data">
+      <small>October 21, 2013 11:14 PM</small><br />
+      <h2><a href="http://viseztrance.com/2013/10/persist-javascript-objects-between-pages.html" rel="bookmark">Persist javascript objects between pages</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Some time ago I worked on a javascript game. One of the major issues I 
+had to overcome, was that all my data would be gone on a page reload or 
+when closing and opening the browser. I've been doing javascript for 
+quite some time now, but I never gave this issue much thought until that
+ time. After searching for a solution, I came out disappointed. <br /><br />I
+ had an object named "game" that contained all the other objects, 
+players, stars, galaxy and they all cross referenced each other (similar
+ to any has many and belongs to associations). Ideally, this would be 
+stored and rebuild on page load. <br /><br />So I came up with my own implementation, which I'll be open sourcing today: <a href="https://github.com/viseztrance/perseverance">https://github.com/viseztrance/perseverance</a><br /><br />If you have any issue, feel free to mail me or open a ticket. However you may want to run the jasmine tests first.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-56">
+  
+  
+     <div class="meta-data">
+      <small>October  7, 2013 11:55 PM</small><br />
+      <h2><a href="http://viseztrance.com/2013/10/from-fixtures-to-factory-girl.html" rel="bookmark">From fixtures to factory girl</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Inheriting a legacy application doesn't really have to be a chore. Bringing everything up to date is rewarding in its own way, although writing a ton of new tests isn't the most exciting thing around. <br /><br />Once everything was at a point we were comfortable with, we replaced the tightly coupled fixtures with Factory Girl. I knew there's a significant performance penalty to be paid, but it was rather shocking. At 20 minutes, the test suite took almost twice as long.<br /><br />I refactored some tests, mostly replacing FactoryGirl's create method with build_stubbed for non database operations but managed to shave off only two minutes.<br /><br />After some research, it looked like a user was created for every controller spec. There were legitimate cases, but most of the time this wasn't the case. So I ended up doing the following - a controller's current_user method gets stubbed by default, whereas if a current_user argument is passed it gets created as an AR object, for instance:<br /><br /><blockquote>it "does stuff", current_user: true do<br />&nbsp; # doing stuff<br />end<br /></blockquote><br />The code responsible looked similar to the following:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each, type: :controller do<br />&nbsp;&nbsp;&nbsp; user = if example.options[:current_user]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.create(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.build_stubbed(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; controller.stub(:current_user).and_return(user)<br />&nbsp; end<br />end<br /></blockquote><br />The tests were faster at almost 12 minutes, but they still felt slow. Rspec's "--profile" flag didn't return any major offenders and just confirmed that most of the tests were just "slow". Trying to shave a few more seconds, I tried to use the same current_user approach to restrict search indexing.<br /><br />As we were using an acts_as_solr:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each do<br />&nbsp;&nbsp;&nbsp; solr_models = [Model1, Model2, #..]<br />&nbsp;&nbsp;&nbsp; solr_models.each do |model|<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if example.options[:search]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ActsAsSolr::Post.execute(Solr::Request::Delete.new(:query =&gt; "type_t:#{model}"))<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = true<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = false<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />end<br /></blockquote><br />Not the cleanest implementation around, but it got the job done. The results were surprising to say the least. The tests took almost two and a half minutes, which is quite ok for over one thousand tests.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+	      </ul>
+	      
+	      <div class="content-nav">
+          <a href="http://viseztrance.com/2012/05/">&laquo; May 2012</a> |
+          <a href="http://viseztrance.com/">Main Index</a>
+          
+        </div>
+       </div>
+			<!-- Content End -->
+			
+			<!-- Footer -->
+				<div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+			<!-- Footer End -->
+		</div>
+	</body>
+</html>

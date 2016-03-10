@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="keywords" content="" />
+<meta name="description" content="I recently worked on a project that generated some custom images using RMagick. There were several texts involved with some spanning over multiple rows. While RMagick does provide a caption method that wraps the text, I found it rather limiting...." />
+
+
+    <link rel="prev bookmark" href="http://viseztrance.com/2011/02/website-screenshots-under-linux-are-about-to-get-easier.html" title="Website screenshots under linux are about to get easier" />
+    <link rel="next bookmark" href="http://viseztrance.com/2011/03/im-done-posting-on-stackoverflow.html" title="I'm done posting on StackOverflow" />
+    
+    <title>Texts over multiple lines with RMagick - VisezTrance</title>
+</head>
+<body>
+<div id="container">
+<!-- Header -->
+  <div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+<!-- Header End -->
+
+<!-- Content -->
+<div id="content">
+<ul id="posts-list">
+            <li class="post" id="post-46">
+  
+  
+     <div class="meta-data">
+      <small>March  2, 2011 11:14 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/03/texts-over-multiple-lines-with-rmagick.html" rel="bookmark">Texts over multiple lines with RMagick</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      I recently worked on a project that generated some custom images using RMagick. There were several texts involved with some spanning over multiple rows. While RMagick does provide a caption method that wraps the text, I found it rather limiting. So instead I used the more powerful annotate method which allowed me to set my own font and text position.<br /><br />Having just a canvas (an RMagick image for background), I started by creating a new drawing object:<br /><br /><blockquote>drawing = Magick::Draw.new<br /></blockquote><br />I then used a method for splitting the text into rows (stolen from a rails helper):<br /><br /><blockquote>def word_wrap(text, columns = 80)<br />&nbsp; text.split("\n").collect do |line|<br />&nbsp;&nbsp;&nbsp; line.length &gt; columns ? line.gsub(/(.{1,#{columns}})(\s+|$)/, "\\1\n").strip : line<br />&nbsp; end * "\n"<br />end<br /></blockquote><br />Writing the actual text was easier than I initially thought.<br /><br /><blockquote>position = 80<br />word_wrap(my_long_text, 90).split(\n).each do |row|<br />&nbsp; drawing.annotate(canvas, 0, 0, 200, position += 20, row)<br />end<br /></blockquote><br />The text is being added at the 200, 100 coordinates, with a line height of 20. That's it.
+     
+
+
+	  </div>
+	
+	
+	
+    
+      <div class="tags">
+        <h4>Tags:</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=RMagick&amp;limit=20';return false;" rel="tag">RMagick</a><span class="delimiter">,</span></li> <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=ruby&amp;limit=20';return false;" rel="tag">ruby</a></li>
+        </ul>
+      </div>
+    
+  
+  
+  
+</li>
+
+</ul>
+       </div>
+<!-- Content End -->
+
+<!-- Footer -->
+  <div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+<!-- Footer End -->
+</div>
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="description" content="The wonderful world of Lorem Ipsum" />
+
+
+	  <title>VisezTrance</title>
+		<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://viseztrance.com/rsd.xml" />
+	</head>
+	<body>
+		<div id="container">
+			<!-- Header -->
+  			<div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+			<!-- Header End -->
+			
+			<!-- Content -->
+			<div id="content">
+				<ul id="posts-list">
+				  
+            <li class="post" id="post-57">
+  
+  
+     <div class="meta-data">
+      <small>October 21, 2013 11:14 PM</small><br />
+      <h2><a href="http://viseztrance.com/2013/10/persist-javascript-objects-between-pages.html" rel="bookmark">Persist javascript objects between pages</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Some time ago I worked on a javascript game. One of the major issues I 
+had to overcome, was that all my data would be gone on a page reload or 
+when closing and opening the browser. I've been doing javascript for 
+quite some time now, but I never gave this issue much thought until that
+ time. After searching for a solution, I came out disappointed. <br /><br />I
+ had an object named "game" that contained all the other objects, 
+players, stars, galaxy and they all cross referenced each other (similar
+ to any has many and belongs to associations). Ideally, this would be 
+stored and rebuild on page load. <br /><br />So I came up with my own implementation, which I'll be open sourcing today: <a href="https://github.com/viseztrance/perseverance">https://github.com/viseztrance/perseverance</a><br /><br />If you have any issue, feel free to mail me or open a ticket. However you may want to run the jasmine tests first.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-56">
+  
+  
+     <div class="meta-data">
+      <small>October  7, 2013 11:55 PM</small><br />
+      <h2><a href="http://viseztrance.com/2013/10/from-fixtures-to-factory-girl.html" rel="bookmark">From fixtures to factory girl</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Inheriting a legacy application doesn't really have to be a chore. Bringing everything up to date is rewarding in its own way, although writing a ton of new tests isn't the most exciting thing around. <br /><br />Once everything was at a point we were comfortable with, we replaced the tightly coupled fixtures with Factory Girl. I knew there's a significant performance penalty to be paid, but it was rather shocking. At 20 minutes, the test suite took almost twice as long.<br /><br />I refactored some tests, mostly replacing FactoryGirl's create method with build_stubbed for non database operations but managed to shave off only two minutes.<br /><br />After some research, it looked like a user was created for every controller spec. There were legitimate cases, but most of the time this wasn't the case. So I ended up doing the following - a controller's current_user method gets stubbed by default, whereas if a current_user argument is passed it gets created as an AR object, for instance:<br /><br /><blockquote>it "does stuff", current_user: true do<br />&nbsp; # doing stuff<br />end<br /></blockquote><br />The code responsible looked similar to the following:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each, type: :controller do<br />&nbsp;&nbsp;&nbsp; user = if example.options[:current_user]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.create(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FactoryGirl.build_stubbed(:user)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; controller.stub(:current_user).and_return(user)<br />&nbsp; end<br />end<br /></blockquote><br />The tests were faster at almost 12 minutes, but they still felt slow. Rspec's "--profile" flag didn't return any major offenders and just confirmed that most of the tests were just "slow". Trying to shave a few more seconds, I tried to use the same current_user approach to restrict search indexing.<br /><br />As we were using an acts_as_solr:<br /><br /><blockquote>RSpec.configure do |config|<br />&nbsp; config.before :each do<br />&nbsp;&nbsp;&nbsp; solr_models = [Model1, Model2, #..]<br />&nbsp;&nbsp;&nbsp; solr_models.each do |model|<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if example.options[:search]<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ActsAsSolr::Post.execute(Solr::Request::Delete.new(:query =&gt; "type_t:#{model}"))<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = true<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; model.configuration[:if] = false<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; end<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />end<br /></blockquote><br />Not the cleanest implementation around, but it got the job done. The results were surprising to say the least. The tests took almost two and a half minutes, which is quite ok for over one thousand tests.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-55">
+  
+  
+     <div class="meta-data">
+      <small>May  1, 2012  6:12 PM</small><br />
+      <h2><a href="http://viseztrance.com/2012/05/abstract-naming-conventions.html" rel="bookmark">Abstract naming conventions</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      From time to time I get stumped - I just can't find a *good* name for a class, method or variable. Sometimes I search for synonyms online or ask a colleague for suggestions. However, the naming conventions used in rails makes things easier, yet they may not scale very well. <br /><br />For example, a polymorphic comment association is usually named commentable, whereas for an image - imageable. Simple enough, but the fact is that I actually ended up with names such as photoable, wallable and wizzardable (I kid you not).<br /><br />Right now I'm using parent, and it works great.<br /><br /><blockquote>belongs_to :parent, :polymorphic =&gt; true<br /></blockquote><br />However, parent.parent.post is not as informative as imageable.commentable.post, but frankly this is hardly a problem. Based on <a href="http://railscasts.com/episodes/154-polymorphic-association">this railscasts episode</a>, I could get the current parent inside a controller by using the following:<br /><br /><blockquote>def find_commentable<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(.+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />Do this for images as well, and you'll probably see a pattern. So how about we just rewrite it in the application controller:<br /><br /><blockquote>def current_parent<br />&nbsp; return @current_parent if @current_parent<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(\w+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @current_parent = $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return @current_parent<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />So using parent actually makes sense. <br /><br />If your application gets large enough, or you need to fix a bug on an older project you'll probably notice one thing - you can't recall the column names. Was it name, subject, title or content, contents, description? This gets even worse if you haven't wrote that code in the first place. For more than a year, on the projects I've been working on (which have been quite a few) I decided on always sticking with name for single line descriptions (varchar) and contents for the ones with multiple lines (text). There may be other fields of course, but this worked out surprisingly well. <br /><br />It feels nice when a colleague writes the frontend and doesn't even need to look over the database schema. 
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-54">
+  
+  
+     <div class="meta-data">
+      <small>October  6, 2011  7:55 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/10/nodejs-and-coffeescript.html" rel="bookmark">Nodejs and coffeescript</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      My first contact with nodejs was at Yahoo's open hack event that took place at Bucharest last spring. It was fun, however I just couldn't find the time to tinker with it as much as I would've liked to.<br /><br />Lately this changed, and I'm actually using it for a project we're developing at work where it fits the bill quite nicely. While I'm quite familiar with javascript I'm coding in coffeescript. Initially I was reluctant on using it especially as I'm not very found of indentation based languages, but as far as backend javascript developing goes, it's a god send.<br />I think that the main reason I like it despite its flaws (it's just a wrapper after all) is that it almost forces good coding practices such as using short methods and avoiding deeply nested constructs.<br /><br />I'm using the <a href="https://github.com/defunkt/coffee-mode">emacs coffee mode</a> extension to compile my coffee files to js on each save. I imagine that most major editors have similar extensions as well.<br /><br />Restarting node on each change can get a bit tiresome. To resolve this I'm using the <a href="https://github.com/isaacs/node-supervisor">supervisor plugin</a>:<br /><br /><blockquote>npm install -g supervisor<br /></blockquote><br />And instead of starting the application with node:<br /><br /><blockquote>supervisor -p server.js<br /></blockquote><br />Basically the browser can now be refreshed on each coffee file change. Neat.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-53">
+  
+  
+     <div class="meta-data">
+      <small>September 27, 2011 10:25 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/09/sitemap.html" rel="bookmark">Sitemap</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      I recently wrote <a href="https://rubygems.org/gems/sitemap">a sitemap gem</a> for one <a href="http://zilesinopti.ro/">of the more larger sites</a> I have been working on, which was recently revamped.<br /><br />To be fair I searched for existing solutions, but I found them lacking for one reason or another. One of the main problems that these plugins couldn't overcome was generating a different url (such as dynamic domains) based on an existing attribute.<br /><br />There are some limitations as well, most notably the 50.000 urls per sitemap, but I'm planning on resolving this issue some time in the near future.<br /><br />If you decide to test it I strongly believe that the docs cover the functionality pretty well. Additionally make sure using webmaster-tools that google bot can use your feed.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-52">
+  
+  
+     <div class="meta-data">
+      <small>September 27, 2011  9:55 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/09/user-names-consistency.html" rel="bookmark">User names consistency</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Just as I don't like mixing tabs with spaces I hate it when people type in a form using their real name without any concern for capitalization.<br /><br />I could had certainly write a one liner that fixes this, but I recently started using the <a href="https://rubygems.org/gems/namecase">namecase gem</a> which also provides some more interesting cases as well:<br /><br /><blockquote><pre>NameCase("RON BURGUNDY")  # =&gt; Ron Burgundy
+NameCase("MCDONALDS")     # =&gt; McDonalds</pre></blockquote>
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-48">
+  
+  
+     <div class="meta-data">
+      <small>March 19, 2011 11:55 AM</small><br />
+      <h2><a href="http://viseztrance.com/2011/03/old-wounds-heal-slow.html" rel="bookmark">Old wounds heal slow</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Internet Explorer 9 was recently launched and received an overwhelming amount of positive reviews as well as a nice welcome from the developer community.<br /><br />My thoughts about it remind me of a story I heard many years ago.<br /><br /><blockquote>A child's obnoxious behavior upsets his father on a daily basis. The afflicted parent would sometimes hammer a nail onto a door. After a while the curious child asked about the nails - "I've put a nail every time you made a bad deed", his father sorrowly answered. Later on, somewhat troubled, the child told his father "Look, I've thought about it and I don't want to upset you again, but for each day I behave you will take out a nail." The two were in agreement and as the days passed the parent would remove one nail after the other. One day the boy noticed that the nails were all gone. Happy, he called out his father "Look, I made it, the door doesn't have any more nails". "You're right", his father answered, "but what about the holes?"<br /></blockquote><br />While it's really nice that IE is once again a good browser, it's just not going to give me back all the nights I lost hacking layouts for the better half of the last decade.
+     
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-47">
+  
+  
+     <div class="meta-data">
+      <small>March  7, 2011  2:09 AM</small><br />
+      <h2><a href="http://viseztrance.com/2011/03/im-done-posting-on-stackoverflow.html" rel="bookmark">I'm done posting on StackOverflow</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      I can honestly say that the main reason for helping others is selfishness, because you see there's a certain feeling of accomplishment when helping someone with an issue that eluded me as well.<br /><br />A few years ago I found my self spending quite <a href="http://xkcd.com/386">some time</a> on various forums. While it was mostly procrastinating I had the distinct feeling that I was actually contributing to something. After moving out from my parents house, on to the big city I met some very cool people, that had a lesser interest in an online presence and more of a hands on approach to tackle real problems. I was now reading the source code rather then browsing outdated blog posts.<br /><br />One day, having a project with a tighter deadline and a long commute I was working from the comfort of my home trying to finish up. I was almost there, just needed to implement a pure javascript survey module by detecting the most common element in an array. Not a difficult task per se, but once you begin to feel tired, lousy code doesn't look that bad anymore. I took a short nap to rejuvenate my strength, but before doing so also asked a question on this new website popping up in the results all the time, named <a href="http://stackoverflow.com/">StackOverflow</a>. Upon waking up I found a few answers, but most importantly they worked. It almost felt like cheating.<br /><br />Since then I answered other people questions on SO every now and then. Reward points are being granted by doing so which feel quite nice. What didn't felt so nice was that answers to difficult questions were more unlikely to be voted up, probably because few had the knowledge to understand them, while easier common day issues would get way more attention. Suffice to say that the very system that made it so great was also its greatest fault. As post quality dropped, so did my interest.<br /><br />Granted, I found many gems there, but it's time to walk away and wait for the "next thing". 
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-46">
+  
+  
+     <div class="meta-data">
+      <small>March  2, 2011 11:14 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/03/texts-over-multiple-lines-with-rmagick.html" rel="bookmark">Texts over multiple lines with RMagick</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      I recently worked on a project that generated some custom images using RMagick. There were several texts involved with some spanning over multiple rows. While RMagick does provide a caption method that wraps the text, I found it rather limiting. So instead I used the more powerful annotate method which allowed me to set my own font and text position.<br /><br />Having just a canvas (an RMagick image for background), I started by creating a new drawing object:<br /><br /><blockquote>drawing = Magick::Draw.new<br /></blockquote><br />I then used a method for splitting the text into rows (stolen from a rails helper):<br /><br /><blockquote>def word_wrap(text, columns = 80)<br />&nbsp; text.split("\n").collect do |line|<br />&nbsp;&nbsp;&nbsp; line.length &gt; columns ? line.gsub(/(.{1,#{columns}})(\s+|$)/, "\\1\n").strip : line<br />&nbsp; end * "\n"<br />end<br /></blockquote><br />Writing the actual text was easier than I initially thought.<br /><br /><blockquote>position = 80<br />word_wrap(my_long_text, 90).split(\n).each do |row|<br />&nbsp; drawing.annotate(canvas, 0, 0, 200, position += 20, row)<br />end<br /></blockquote><br />The text is being added at the 200, 100 coordinates, with a line height of 20. That's it.
+     
+
+
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-45">
+  
+  
+     <div class="meta-data">
+      <small>February 27, 2011  1:39 AM</small><br />
+      <h2><a href="http://viseztrance.com/2011/02/website-screenshots-under-linux-are-about-to-get-easier.html" rel="bookmark">Website screenshots under linux are about to get easier</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      I just published the code that handles the screenshots of <a href="http://mywebsit.es/">mywebsit.es</a>.<br /><br />Either use "gem install website_screenshot" or head over to <a href="https://github.com/viseztrance/website_screenshot">github</a> to get it. I also posted a <a href="http://github.com/viseztrance/website_screenshot_service">web service demo</a> to make implementation more straightforward.<br /><br />Dependencies include ruby 1.8.6 or higher, ruby qt and curl.<br />Tested on Ubuntu LTS and Fedora.<br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+	</ul>
+			</div>
+			<!-- Content End -->
+			
+			<!-- Footer -->
+			  <div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+			<!-- Footer End -->
+		</div>
+	</body>
+</html>

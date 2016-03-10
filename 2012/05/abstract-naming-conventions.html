@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="keywords" content="rails, naming conventions, polymorphic" />
+<meta name="description" content="From time to time I get stumped - I just can't find a *good* name for a class, method or variable. Sometimes I search for synonyms online or ask a colleague for suggestions. However, the naming conventions used in rails..." />
+
+
+    <link rel="prev bookmark" href="http://viseztrance.com/2011/10/nodejs-and-coffeescript.html" title="Nodejs and coffeescript" />
+    <link rel="next bookmark" href="http://viseztrance.com/2013/10/from-fixtures-to-factory-girl.html" title="From fixtures to factory girl" />
+    
+    <title>Abstract naming conventions - VisezTrance</title>
+</head>
+<body>
+<div id="container">
+<!-- Header -->
+  <div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+<!-- Header End -->
+
+<!-- Content -->
+<div id="content">
+<ul id="posts-list">
+            <li class="post" id="post-55">
+  
+  
+     <div class="meta-data">
+      <small>May  1, 2012  6:12 PM</small><br />
+      <h2><a href="http://viseztrance.com/2012/05/abstract-naming-conventions.html" rel="bookmark">Abstract naming conventions</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      From time to time I get stumped - I just can't find a *good* name for a class, method or variable. Sometimes I search for synonyms online or ask a colleague for suggestions. However, the naming conventions used in rails makes things easier, yet they may not scale very well. <br /><br />For example, a polymorphic comment association is usually named commentable, whereas for an image - imageable. Simple enough, but the fact is that I actually ended up with names such as photoable, wallable and wizzardable (I kid you not).<br /><br />Right now I'm using parent, and it works great.<br /><br /><blockquote>belongs_to :parent, :polymorphic =&gt; true<br /></blockquote><br />However, parent.parent.post is not as informative as imageable.commentable.post, but frankly this is hardly a problem. Based on <a href="http://railscasts.com/episodes/154-polymorphic-association">this railscasts episode</a>, I could get the current parent inside a controller by using the following:<br /><br /><blockquote>def find_commentable<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(.+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />Do this for images as well, and you'll probably see a pattern. So how about we just rewrite it in the application controller:<br /><br /><blockquote>def current_parent<br />&nbsp; return @current_parent if @current_parent<br />&nbsp; params.each do |name, value|<br />&nbsp;&nbsp;&nbsp; if name =~ /(\w+)_id$/<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @current_parent = $1.classify.constantize.find(value)<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return @current_parent<br />&nbsp;&nbsp;&nbsp; end<br />&nbsp; end<br />&nbsp; nil<br />end<br /></blockquote><br />So using parent actually makes sense. <br /><br />If your application gets large enough, or you need to fix a bug on an older project you'll probably notice one thing - you can't recall the column names. Was it name, subject, title or content, contents, description? This gets even worse if you haven't wrote that code in the first place. For more than a year, on the projects I've been working on (which have been quite a few) I decided on always sticking with name for single line descriptions (varchar) and contents for the ones with multiple lines (text). There may be other fields of course, but this worked out surprisingly well. <br /><br />It feels nice when a colleague writes the frontend and doesn't even need to look over the database schema. 
+	  </div>
+	
+	
+	
+    
+      <div class="tags">
+        <h4>Tags:</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=naming&amp;limit=20';return false;" rel="tag">naming</a><span class="delimiter">,</span></li> <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=rails&amp;limit=20';return false;" rel="tag">rails</a></li>
+        </ul>
+      </div>
+    
+  
+  
+  
+</li>
+
+</ul>
+       </div>
+<!-- Content End -->
+
+<!-- Footer -->
+  <div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+<!-- Footer End -->
+</div>
+</body>
+</html>

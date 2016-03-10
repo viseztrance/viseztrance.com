@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="keywords" content="" />
+<meta name="description" content="It's pretty common these days to integrate widgets from several sources and aggregate them to your website.In an ideal world you would simply parse your api response(an xml for example) and display it on your page.While this doesn't include javascript..." />
+
+
+    <link rel="prev bookmark" href="http://viseztrance.com/2009/08/simple-gnome-process-completion-monitoring.html" title="Simple gnome process completion monitoring" />
+    <link rel="next bookmark" href="http://viseztrance.com/2009/10/mysql-connection-encoding-in-php.html" title="Mysql connection encoding in php" />
+    
+    <title>A defensive approach on integrating api based widgets - VisezTrance</title>
+</head>
+<body>
+<div id="container">
+<!-- Header -->
+  <div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+<!-- Header End -->
+
+<!-- Content -->
+<div id="content">
+<ul id="posts-list">
+            <li class="post" id="post-28">
+  
+  
+     <div class="meta-data">
+      <small>September 21, 2009  1:29 AM</small><br />
+      <h2><a href="http://viseztrance.com/2009/09/a-defensive-approach-on-integrating-api-based-widgets.html" rel="bookmark">A defensive approach on integrating api based widgets</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      It's pretty common these days to integrate widgets from several sources and aggregate them to your website.<br />In an ideal world you would simply parse your api response(an xml for example) and display it on your page.<br /><br />While this doesn't include javascript widgets, these are some thoughts I gathered which may prove useful:<br /><br /><b>Always cache</b><br />Cache the api response or the page fragment being rendered, otherwise your website will load slowly. It's not only about speed, but most api providers request this. So while you may get away without caching for a while, you may find your self banned after a traffic spike.<br /><br /><b>Make sure you write the code efficient</b><br />While I consider this a newbies tip, I wouldn't had mentioned it if I had not encounterd it.<br /><br />Never do this:<br /><br /><blockquote>foreach(getFeedContent() as $entry) {<br />&nbsp; // display code<br />}<br /></blockquote><br />At each iteration the server would try to fetch and parse the feed.<br />So at a basic level you should have something in the lines of:<br /><br /><blockquote>$entries = getFeedContent();<br />foreach($entries as $entry) {<br />&nbsp; // display code<br />}<br /></blockquote><br /><b>Don't assume that you'll get a valid response</b><br />Sometimes your provider may send you an invalid/blank response. If this is happening often make sure you check its integrity before caching it. This way you won't be stuck with an empty section in your page for the period the page has been cached. Additionally make sure this check is done inside your actual code as well so that you don't display the affected section or at least have it degrade to a nice custom error message.<br /><br /><b>Protect your layout</b><br />If you have images inside your response and intend to use them, scale them to a predefined maximum size and store them on your server. If they always have fixed proportions make sure that they actually stay fixed by adding the width and height attributes. This will also keep the page elements size constant, avoiding the erratic text rearrangement while the page loads. <br /><br />If your widgets are user driven - be it latest comments or what your cat twitted it's always a good idea to hide long words. <br />So when someone writes Hellooooooo (and multiply that "o" ten fold), simply use: "overflow: hidden" on your text container. To add a touch of finesse because everyone loves IE, use "overflow: ellipsis" in it's conditional stylesheet.<br /><br /><b>Escape outputted text</b><br />From a security standpoint it's good to escape everything you output on the page (where possible).<br />From a w3c compliance standpoint your code may not always validate. For example: http://website.org/?param=x&amp;param2=y; &amp; should be escaped into &amp;amp; Or you may have something more serious such as an unclosed tag, yet it's very unlikely.<br /><br />Hopefully this advice will leave your widgets to a boring yet stable experience.<br /> 
+	  </div>
+	
+	
+	
+    
+      <div class="tags">
+        <h4>Tags:</h4>
+        <ul>
+          <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=api&amp;limit=20';return false;" rel="tag">api</a><span class="delimiter">,</span></li> <li><a href="javascript:void(0)" onclick="location.href='http://source.viseztrance.com/mt-search.cgi?blog_id=1&amp;tag=defensive%20programming&amp;limit=20';return false;" rel="tag">defensive programming</a></li>
+        </ul>
+      </div>
+    
+  
+  
+  
+</li>
+
+</ul>
+       </div>
+<!-- Content End -->
+
+<!-- Footer -->
+  <div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+<!-- Footer End -->
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+@import url('base.css');
+@import url('mt.css');
+
+body {
+  background: url('../images/timelesness.png') 100% 0 fixed no-repeat;
+  min-width: 900px;
+}
+h1, h2 {
+  text-shadow: #ddd 1px 1px 1px;
+}
+cite {
+  font-family: URW Palladio L, Times, Arial;
+}
+blockquote {
+  padding: 5px 10px;
+  color: #444;
+}
+hr {
+  height: 0px;
+  border-top: 1px solid #ccc;
+}
+h1 a:hover, h2 a:hover {
+  text-decoration: none;
+  color: #777;
+}
+h1 {
+  font-size: 50px;
+}
+h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+h4 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.meta-data {
+  color: #aaa;
+  margin-bottom: 4px;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: "URW Palladio L", Times;
+  font-weight: normal;
+}
+#container {
+  width: 500px;
+  padding: 25px;
+}
+
+#header {
+  
+}
+  #header h1 {
+    font-size: 40px;
+    margin: 15px 0 32px;
+  }
+
+#content ul#posts {
+
+}
+  #content ul#posts-list li.post {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #ccc;
+  }
+   #content ul#posts-list li.post:last-child {
+     border: none;
+   }
+  #content ul#comments-list li.comment {
+    padding-bottom: 10px;
+  }
+#footer {
+  margin-top: 20px;
+}
+  #footer p {
+     padding-top: 15px;
+   }
+  #footer #footer-sections-list {
+    border-top: 1px solid #ccc;
+    padding-top: 20px;
+  }
+    #footer #footer-sections-list li.section {
+      float: left;
+      width: 150px;
+      margin-right: 13px;
+    }
+      #footer #footer-sections-list li.section #search {
+        width: 90%;
+      }

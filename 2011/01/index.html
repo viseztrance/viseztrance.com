@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="description" content="A ruby on rails frontend implementation story," />
+
+
+    <title>VisezTrance: January 2011 Archives</title>
+      
+      <link rel="prev" href="http://viseztrance.com/2010/09/" title="September 2010" />
+      <link rel="next" href="http://viseztrance.com/2011/02/" title="February 2011" />
+    
+	</head>
+	<body>
+		<div id="container">
+			<!-- Header -->
+  			<div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+			<!-- Header End -->
+			
+			<!-- Content -->
+			<div id="content">
+			
+			  
+          <h2 class="page-title">January 2011 Archives</h2>
+        
+        
+	      <ul id="posts-list">
+	        
+          
+            <li class="post" id="post-44">
+  
+  
+     <div class="meta-data">
+      <small>January 23, 2011  7:27 PM</small><br />
+      <h2><a href="http://viseztrance.com/2011/01/a-ruby-on-rails-frontend-implementation-story.html" rel="bookmark">A ruby on rails frontend implementation story</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      For the last year I have been working on a large social network website.<br />
+As I preper to move forward I can't help thinking of the challenges that aroused during this time.<br />
+One in particular stood out. The form fields were heavily customised - 
+every field, be it a simple text or select, even file uploads were all 
+styled.<br />
+The design was less than ideal for a project this size to say the least.<br />
+<br />
+While I didn't code the html I had to find a solution to integrate it that worked well and wouldn't prove to be time consuming.<br />
+The solution I chose was to extend the default form and use it across 
+the site. Even if these forms were to be styled with javascript it would
+ had just resulted in a poor user experience as each page form would 
+briefly be displayed naked then quickly styled.<br />
+<br />
+Bear in mind that this code runs under Rails 2. It may require some adjustments to work with 3.<br />
+<br />
+Firstly I defined my own form builder:<br />
+<br /><blockquote>
+class CustomFormBuilder &lt; ActionView::Helpers::FormBuilder<br />
+<br />
+&nbsp; include ActionView::Helpers::TagHelper<br />
+&nbsp; include ActionView::Helpers::AssetTagHelper<br />
+<br />
+&nbsp; ..<br />
+<br />
+end<br /></blockquote>
+<br />
+As it was going to be used sitewise I also made it default in my environment file:<br />
+<br /><blockquote>
+ActionView::Base.default_form_builder = CustomFormBuilder<br /></blockquote>
+<br />
+Each text field had to be enclosed in a specific span tag with the class
+ "input_text". Targeting with input[type="text"] would had probably 
+worked just as well if you ignore IE6.<br />
+<br /><blockquote>
+def text_field(method, wrapper_options = {}, input_options = {})<br />
+&nbsp; wrapper_options[:class] = (wrapper_options[:class].to_s + ' input_text').strip<br />
+&nbsp; wrapper_options.reverse_merge!({ :class =&gt; 'input_text' })<br />
+&nbsp; content_tag :span, @template.send(:text_field, @object_name, method, objectify_options(input_options)), wrapper_options<br />
+end<br /></blockquote>
+<br />
+You can style both the wrapper and the input field with separate option hashes.<br />
+The password, textarea and select fields were similarly styled. The 
+latter was albeit more difficult but I'm not going to post the code as 
+the markup differs significantly from one implementation to another.<br />
+<br />
+After doing these I received an interesting request of extending the 
+label tag, having many fields that were mandatory and had to be 
+displayed accordingly.<br />
+<br /><blockquote>
+def label(method, text = nil, options = {})<br />
+&nbsp; if options[:required]<br />
+&nbsp;&nbsp;&nbsp; text = (text || method.to_s.humanize) + ' &lt;span class="highlight"&gt;*&lt;/span&gt;'<br />
+&nbsp; end<br />
+&nbsp; super<br />
+end<br /></blockquote>
+<br />
+To do the file uploads (which were surprisingly plentiful) I decided on 
+creating my own helpers, rather than just extending the basic "file". 
+This was mostly because I needed both an actual file upload and a photo 
+upload which had a very different behaviour such a live thumbnails. I 
+used flash (swf upload) because it was the only crossbrowser way of 
+selecting multiple files and styling the actual button.<br />
+<br /><blockquote>
+def flash_photo_upload(name = 'files', options = {})<br />
+&nbsp; locals = {<br />
+&nbsp;&nbsp;&nbsp; :f =&gt; self,<br />
+&nbsp;&nbsp;&nbsp; :name =&gt; name.to_s,<br />
+&nbsp;&nbsp;&nbsp; :queue_limit =&gt; options['queue_limit']<br />
+&nbsp; }<br />
+<br />
+&nbsp; @template.render :partial =&gt; 'partials/flash_file_upload', :locals =&gt; locals<br />
+end<br /></blockquote>
+<br />
+There's a large amount of code responsible for the entire upload 
+process, that's why I isolated it in a partial. Why so much code you 
+ask, well for instance once one or more photos gets uploaded they're 
+displayed in a carousel; also take into consideration that it had to 
+work seamlessly when editing.<br />
+<br />
+The final piece was styling the submit buttons (and also some links that
+ needed to look as buttons) - rounded cornered of different size and 
+backgrounds using a beautiful but proprietary font with a text shadow. 
+We had to support IE, so CSS3 was out of the question because we needed 
+the rounded corners which don't degrade very well. Legal font issues 
+aside, normally I would be doing this with the sliding doors css technique. I went the extra mile and generated the images in ruby using 
+the same css technique but with rmagick. The code partially supported 
+some css parameters to make styling easier.<br />
+I extracted that code and made it public as a gem named <a href="https://rubygems.org/gems/magic_door">magic_door</a>. The helpers are packed separately
+ as a <a href="https://github.com/viseztrance/magic_door_helpers">plugin</a>.<br /><br />
+I hope this helps anyone who faces a similar situation. 
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+	      </ul>
+	      
+	      <div class="content-nav">
+          <a href="http://viseztrance.com/2010/09/">&laquo; September 2010</a> |
+          <a href="http://viseztrance.com/">Main Index</a>
+          | <a href="http://viseztrance.com/2011/02/">February 2011 &raquo;</a>
+        </div>
+       </div>
+			<!-- Content End -->
+			
+			<!-- Footer -->
+				<div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+			<!-- Footer End -->
+		</div>
+	</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="layout.xsl"?>
+
+<page title="Contact Information" selected-navigation-item="contact">
+  <content>
+    <address>
+      Daniel<br />
+      lorem.ipsum@dolor.sit<br />
+      1124 Hardman Road<br />
+      Burlington, VT 05401<br />
+    </address>
+  </content>
+</page>
+

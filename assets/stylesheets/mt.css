@@ -1,0 +1,57 @@
+/* Comments */
+#comments-open-data div {
+  padding-left: 140px;
+  position: relative;
+  line-height: 30px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+  #comments-open-data div label {
+    position: absolute;
+    left: 0;
+  }
+  #comments-open-data div input {
+    width: 352px;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    padding: 3px;
+    color: #7d7d7d;
+  }
+#comments-open-text {
+  margin-top: 10px;
+}
+#comment-text {
+  width: 492px;
+  height: 100px;
+  margin: 10px 0;
+  display: block;
+  border: 1px solid #ccc;
+  padding: 3px;
+  color: #7d7d7d;
+}
+#comment-bake-cookie,
+#comment-reply {
+  vertical-align: middle;
+  border: 1px solid #ccc;
+  padding: 2px;
+}
+#comment-form-remember-me,
+#comment-form-reply {
+  line-height: 30px;
+}
+/* Comments End */
+.tags {
+  padding-top: 5px;
+}
+  .tags h4 {
+    display: inline;
+    font-size: 13px;
+  }
+  .tags ul, .tags ul li {
+    display: inline;
+    font-size: 12px;
+  }
+#search {
+  border: 1px solid #ccc;
+  padding: 2px;
+}

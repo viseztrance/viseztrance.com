@@ -1,0 +1,275 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" id="sixapart-standard">
+	<head>
+	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="generator" content="Movable Type 5.02" />
+<link rel="stylesheet" href="/assets/stylesheets/core.css" type="text/css" />
+<link rel="start" href="http://viseztrance.com/" title="Home" />
+<link rel="alternate" type="application/atom+xml" title="Recent Entries" href="http://viseztrance.com/atom.xml" />
+<script type="text/javascript" src="/mt.js"></script>
+
+
+<meta name="description" content="Creating a static website with XSLT,Alternate favicon with a non IE comment tag," />
+
+
+    <title>VisezTrance: July 2009 Archives</title>
+      
+      <link rel="prev" href="http://viseztrance.com/2009/04/" title="April 2009" />
+      <link rel="next" href="http://viseztrance.com/2009/08/" title="August 2009" />
+    
+	</head>
+	<body>
+		<div id="container">
+			<!-- Header -->
+  			<div id="header">
+<h1 id="identity" title="The wonderful world of Lorem Ipsum">
+  <a href="http://viseztrance.com/" accesskey="1">
+    VisezTrance
+  </a>
+</h1>
+</div>
+
+			<!-- Header End -->
+			
+			<!-- Content -->
+			<div id="content">
+			
+			  
+          <h2 class="page-title">July 2009 Archives</h2>
+        
+        
+	      <ul id="posts-list">
+	        
+          
+            <li class="post" id="post-26">
+  
+  
+     <div class="meta-data">
+      <small>July 25, 2009  7:51 PM</small><br />
+      <h2><a href="http://viseztrance.com/2009/07/creating-a-static-website-with-xslt.html" rel="bookmark">Creating a static website with XSLT</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      A static website usually has a common layout and unique content across
+pages. Changing the layout means changing every page - and it does
+happen, perhaps you have to add a javascript tracking code or correct a
+minor typo - a daunting task for something so trivial. It's really no
+wonder that most developers use SSI or php includes to ease this task.<br />I'm
+going to show you an alternate way of separating your content from the
+actual layout without using any server side code, by using XSLT.<br />Before venturing any further, here is what you should know:<br /><br />Pros:<br />-
+No server side coding. Just copy the code on any server and it will
+work. Your server will still have to display the proper index file
+though (index.xml).<br />- It's fast. Especially if you're running a server that handles static files very fast such as lighttpd or nginx<br /><br />Cons:<br />-
+SEO impaired. It's xml so it's easier to parse, yet it will probably
+rank lower because the XSL code may not be properly parsed by all
+search engines<br />- limited to browsers that support XSLT. Unless you
+are concerned about Links or Konqueror this is a non issue. Major
+browsers that support it include: Firefox, IE6+, Safari, Chrome, Opera<br /><br />If you're still with me let's begin.<br /><br />Create an xml file named index.xml. Paste the following code:<br /><br /><blockquote>&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br />&lt;?xml-stylesheet type="text/xsl" href="layout.xsl"?&gt;<br /><br />&lt;page&gt;<br />&nbsp; &lt;content&gt;<br />&nbsp; &lt;p&gt;<br />&nbsp;&nbsp;&nbsp; Welcome.&lt;br /&gt;<br />&nbsp;&nbsp;&nbsp; This is the default home page.<br />&nbsp; &lt;/p&gt;<br />&nbsp; &lt;/content&gt;<br />&lt;/page&gt;<br /></blockquote><br />The
+content tag represents the unique code that it will change from page to
+page while the actual layout will be handled by the xsl file defined on
+the second row.<br /><br />Create a file named layout.xsl and paste the following code:<br /><br /><blockquote>&lt;?xml version="1.0"?&gt;<br /><br />&lt;xsl:stylesheet version="1.0" <br />&nbsp; xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;<br />&nbsp;
+&lt;xsl:output method="html"
+<br />&nbsp;&nbsp;&nbsp; doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+<br />&nbsp;&nbsp;&nbsp; doctype-public="-//W3C//DTD XHTML 1.0 Transitional//EN" /&gt;<br /><br />&nbsp; &lt;xsl:template match="/"&gt;<br />&nbsp;&nbsp;&nbsp; &lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;<br />&nbsp;&nbsp;&nbsp; &lt;head&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;meta http-equiv="Content-type" content="text/html; charset=utf-8" /&gt;<br />&nbsp;&nbsp;&nbsp; &lt;/head&gt;<br />&nbsp;&nbsp;&nbsp; &lt;body&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;div id="container"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;div id="header"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;h1&gt;My Website&lt;/h1&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;ul class="navigation"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a href="index.xml"&gt;Home&lt;/a&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a href="about.xml"&gt;About&lt;/a&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;a href="contact.xml"&gt;Contact&lt;/a&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/li&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/ul&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/div&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;div id="content"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:copy-of select="page/content" /&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/div&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;div id="footer"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;p&gt;Lorem ipsum dolor sit. &amp;#169; 2009&lt;/p&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/div&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/div&gt;<br />&nbsp;&nbsp;&nbsp; &lt;/body&gt;<br />&nbsp;&nbsp;&nbsp; &lt;/html&gt;<br />&nbsp; &lt;/xsl:template&gt;<br /><br />&lt;/xsl:stylesheet&gt;<br /></blockquote><br />Look
+over the xsl output statement. It's set to html in order for the
+browsers to render the xml file as an html; additionaly we set a
+doctype. This is particulary important for Internet Explorer. Omitting
+the doctype will trigger quirks mode.<br />Inside the content div we get
+the actual page content. You probably noticed the use of the "copy-of"
+element. The difference between it and "value-of" is that it copies the
+entire node, preserving the html tags inside, unlike the latter.<br /><br />Let's style the page.<br /><br /><blockquote>* {<br />&nbsp; margin: 0;<br />&nbsp; padding: 0;<br />}<br /><br />a {<br />&nbsp; color: #00f;<br />}<br /><br />ul li {<br />&nbsp; list-style-type: none;<br />}<br /><br />body {<br />&nbsp; background-color: #fff;<br />&nbsp; font-family: arial, sans-serif;<br />&nbsp; line-height: 18px;<br />&nbsp; font-size: 12px;<br />&nbsp; color: #333;<br />}<br /><br />#container {<br />&nbsp; width: 940px;<br />&nbsp; margin: 20px auto;<br />&nbsp; padding: 15px 10px;<br />&nbsp; border: 1px solid #ccc;<br />&nbsp; background-color: #eee;<br />}<br /><br />&nbsp; #container #header h1 {<br />&nbsp;&nbsp;&nbsp; font-size: 50px;<br />&nbsp;&nbsp;&nbsp; margin: 10px 0 30px 0;<br />&nbsp; }<br />&nbsp; #container #header ul.navigation li {<br />&nbsp;&nbsp;&nbsp; display: inline;<br />&nbsp; }<br />&nbsp;&nbsp;&nbsp; #container #header ul.navigation li a {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; display: block;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; float: left;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; padding: 10px;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; border: 1px solid #000;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; margin-right: 10px;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; text-decoration: none;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; color: #000;<br />&nbsp;&nbsp;&nbsp; }<br />&nbsp;&nbsp;&nbsp; #container #header ul.navigation li a:hover,<br />&nbsp;&nbsp;&nbsp; #container #header ul.navigation li a.selected {<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; background-color: #fff;<br />&nbsp;&nbsp;&nbsp; }<br />&nbsp;&nbsp; &nbsp;<br />&nbsp; #container #content {<br />&nbsp;&nbsp;&nbsp; clear: left;<br />&nbsp;&nbsp;&nbsp; padding: 30px 0;<br />&nbsp; }<br />&nbsp; <br />&nbsp; #container #footer {<br />&nbsp;&nbsp;&nbsp; font-style: oblique;<br />&nbsp; }<br /></blockquote>&nbsp; <br />As
+it turns out static layouts are not that static. The page title should
+change across pages, and the navigation menu should highlight the
+current page item.<br /><br />Inside our index.xml file, we'll add these
+properties. I'm assigning them as attributes, but these could had very
+well been tags.<br /><br /><blockquote>&lt;page title="Welcome" selected-navigation-item="home"&gt;<br /></blockquote><br />Next, back in our xsl file, inside the head tags add the title:<br /><br /><blockquote>&lt;title&gt;&lt;xsl:value-of select="page/@title"/&gt;&lt;/title&gt;<br /></blockquote><br />For the menu we'll have to add the selected class for current navigation item:<br /><br /><blockquote>&lt;ul class="navigation"&gt;<br />&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp; &lt;a href="index.xml"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:if test="page/@selected-navigation-item = 'home'"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:attribute name="class"&gt;selected&lt;/xsl:attribute&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/xsl:if&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Home<br />&nbsp;&nbsp;&nbsp; &lt;/a&gt;<br />&nbsp; &lt;/li&gt;<br />&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp; &lt;a href="about.xml"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:if test="page/@selected-navigation-item = 'about'"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:attribute name="class"&gt;selected&lt;/xsl:attribute&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/xsl:if&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; About<br />&nbsp;&nbsp;&nbsp; &lt;/a&gt;<br />&nbsp; &lt;/li&gt;<br />&nbsp; &lt;li&gt;<br />&nbsp;&nbsp;&nbsp; &lt;a href="contact.xml"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:if test="page/@selected-navigation-item = 'contact'"&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;xsl:attribute name="class"&gt;selected&lt;/xsl:attribute&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/xsl:if&gt;<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Contact<br />&nbsp;&nbsp;&nbsp; &lt;/a&gt;<br />&nbsp; &lt;/li&gt;<br />&lt;/ul&gt;<br /></blockquote><br />Create the about.xml and contact.xml files by using the index.xml file. <br /><br />This wraps it up.<br /><br />- <a href="http://viseztrance.com/code/xsl/index.xml">The final result</a><br />- <a href="http://viseztrance.com/code/xsl/xsl.zip">Download files</a><br /><br />While
+this approach does have it's fair share of downsides I think it's an
+interesting way of code separation that may be worth taking a closer
+look. <br />
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+            <li class="post" id="post-25">
+  
+  
+     <div class="meta-data">
+      <small>July 15, 2009  1:23 AM</small><br />
+      <h2><a href="http://viseztrance.com/2009/07/alternate-favicon-with-a-non-ie-comment-tag.html" rel="bookmark">Alternate favicon with a non IE comment tag</a></h2>
+      <small>
+      
+        By <a class="fn url" href="http://viseztrance.com">Daniel</a>
+      
+      
+        
+        
+      
+	  </small>
+	</div>
+	
+	
+	  <div class="body">
+      Quite often I look at the html source of some of the websites I visit. Last night I found this interesting snippet while browsing <a href="http://www.deviantart.com/">Deviantart</a>:<br /><br /><blockquote>&lt;link href="http://st.deviantart.net/icons/favicon.ico" rel="icon"/&gt;<br />&lt;![if ! IE]&gt;<br />&lt;link href="http://i.deviantart.net/icons/favicon.png" rel="shortcut icon"/&gt;<br />&lt;![endif]&gt;<br /></blockquote><br />A brilliant use of the non IE comment tag, forcing browsers that support it to use an alternate higher quality png image while degrading gracefully to a generic ico file. 
+	  </div>
+	
+	
+	
+  
+  
+</li>
+
+          
+	      </ul>
+	      
+	      <div class="content-nav">
+          <a href="http://viseztrance.com/2009/04/">&laquo; April 2009</a> |
+          <a href="http://viseztrance.com/">Main Index</a>
+          | <a href="http://viseztrance.com/2009/08/">August 2009 &raquo;</a>
+        </div>
+       </div>
+			<!-- Content End -->
+			
+			<!-- Footer -->
+				<div id="footer">
+  <ul id="footer-sections-list">
+    <li class="section">
+  <h4 class="widget-header"><label for="search">Search</label></h4>
+  <form method="get" action="http://source.viseztrance.com/mt-search.cgi">
+  <div>
+  <input type="text" id="search" name="search" value="" />
+  
+    <input type="hidden" name="IncludeBlogs" value="1" />
+  
+    <input type="hidden" name="limit" value="20" />
+    <input type="submit" accesskey="4" value="Search" />
+  </div>
+  </form>
+  
+</li>
+<li class="section">
+        <h4>Monthly Archives</h4>
+        <ul>
+        
+            <li><a href="http://viseztrance.com/2013/10/">October 2013 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2012/05/">May 2012 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/10/">October 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/09/">September 2011 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/03/">March 2011 (3)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/02/">February 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2011/01/">January 2011 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/09/">September 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/08/">August 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/06/">June 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2010/04/">April 2010 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/12/">December 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/10/">October 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/09/">September 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/08/">August 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/07/">July 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/04/">April 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/02/">February 2009 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2009/01/">January 2009 (2)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/12/">December 2008 (1)</a></li>
+        
+    
+        
+            <li><a href="http://viseztrance.com/2008/10/">October 2008 (1)</a></li>
+        
+        </ul>
+        </li>
+        
+    
+
+<li class="section">
+    <h4>Pages</h4>
+        <ul>
+    
+            <li class="page page-2"><a href="http://viseztrance.com/about.html">About / Contact</a></li>
+    
+    
+        </ul>
+    </li>
+
+
+  </ul>
+  <p class="clear"><cite>2008, &copy; Daniel Mircea</cite></p>
+</div>
+
+
+			<!-- Footer End -->
+		</div>
+	</body>
+</html>

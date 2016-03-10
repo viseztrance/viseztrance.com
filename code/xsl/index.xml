@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="layout.xsl"?>
+
+<page title="Welcome" selected-navigation-item="home">
+  <content>
+  <p>
+    Welcome.<br />
+    This is the default home page.
+  </p>
+  </content>
+</page>
+
